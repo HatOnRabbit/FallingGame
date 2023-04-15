@@ -1,0 +1,336 @@
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Random;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.JFrame;
+
+public class Falling_Game implements KeyListener{
+	
+	float gameSpeed = 750f;
+	boolean gameOver = false;
+	
+	JFrame gameWindow = new JFrame();
+	int[][] matrix = new int[12][5];
+	JPanel[][] jPanelmatrix = new JPanel[12][5];
+	
+	JLabel gameOverLabel = new JLabel("Game Over");
+	
+	JPanel gameBoard = new JPanel();
+	
+	JPanel gameOverPanel = new JPanel();
+    
+	JButton button = new JButton("Exit");
+	
+	int playerLocation = 2;
+	
+	boolean firstOpen = true;
+	
+	private long startTime = System.currentTimeMillis();
+	
+	ArrayList<Coord> coords = new ArrayList<Coord>();//This one holds the coords of the falling blocks
+	
+	public void CreateGameBoard() {
+
+		// initializing the 2D array
+		for(int i = 0; i < matrix.length; i++) {
+		    for(int j = 0; j < matrix[i].length; j++) {
+		        matrix[i][j] = 0;
+		    }
+		}
+		
+		for(int i = 0; i < matrix.length; i++) {
+		    for(int j = 0; j < matrix[i].length; j++) {
+		    	//System.out.print(matrix[i][j]);
+			}
+			//System.out.println();
+		}
+		
+		for (int i = 0; i < jPanelmatrix.length; i++) {
+		    for (int j = 0; j < jPanelmatrix[i].length; j++) {
+		        jPanelmatrix[i][j] = new JPanel();
+		    }
+		}
+	}
+	
+	public void JFrameBuilder() {
+		gameWindow.setVisible(true);
+		gameWindow.setSize(new Dimension(300, 600));
+		gameWindow.setLocationRelativeTo(null);
+		gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		firstOpen = false;
+		
+		gameWindow.addKeyListener(this);
+		
+		gameBoard.setLayout(new GridLayout(12, 5)); // set the layout to 4 rows and 4 columns
+
+		gameOverLabel.setHorizontalAlignment(JLabel.CENTER);
+		gameOverLabel.setVerticalAlignment(JLabel.CENTER);
+		gameOverLabel.setFont(new Font("Arial", Font.BOLD, 36));
+		
+		button.setHorizontalAlignment(JLabel.CENTER);
+		button.setVerticalAlignment(JLabel.CENTER);
+		button.setFont(new Font("Arial", Font.BOLD, 36));
+		button.setSize(50, 10);
+		
+		gameOverPanel.setLayout(new BoxLayout(gameOverPanel, BoxLayout.PAGE_AXIS));
+        
+		gameOverPanel.setLayout(new BoxLayout(gameOverPanel, BoxLayout.PAGE_AXIS));
+		gameOverPanel.add(Box.createVerticalGlue());
+		gameOverPanel.add(gameOverLabel);
+		long endTime = System.currentTimeMillis();
+        long runTime = endTime - this.startTime;
+        
+        JLabel score = new JLabel("Score: " + runTime);
+        score.setFont(new Font("Arial", Font.BOLD, 26));
+		gameOverPanel.add(score);
+        gameOverPanel.add(button);
+        gameOverPanel.add(Box.createVerticalGlue());
+        gameOverLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        score.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        
+        // Add glue to the left and right to center the components horizontally
+        gameOverPanel.add(Box.createHorizontalGlue());
+
+		
+		button.addActionListener(new ActionListener() {
+	         public void actionPerformed(ActionEvent e) {
+	            gameOver = false;
+	            System.exit(0);
+	            //RestartGame();
+	         }
+	      });
+		
+		RecreateWindow();
+	}
+	
+	public void RecreateWindow() {
+		
+        // create and add tiles to the panel
+        for (int i = 0; i < matrix.length; i++) {
+        	for(int x = 0; x < matrix[1].length; x++) {
+        		//System.out.print(x + "" + i);
+        		jPanelmatrix[i][x].setPreferredSize(new Dimension(60, 50));
+            	jPanelmatrix[i][x].setBackground(Color.white); // alternate tile colors
+            	if(matrix[i][x] == 1) {
+            		jPanelmatrix[i][x].setBackground(Color.MAGENTA);
+            	}
+            	gameBoard.add(jPanelmatrix[i][x]);
+        	}
+        }
+        gameWindow.add(gameBoard);
+        gameWindow.pack();
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == button) { // check if the button was clicked
+        	//System.out.println("Restarting");
+        	System.exit(0);
+        }
+    }
+	
+	public void RandomizeDrop() {
+		Random random = new Random();
+		int spawns = random.nextInt(4);
+		
+		for(int i = 0; i < spawns; i++) {
+			//System.out.println("Spawning at " + random.nextInt(5));
+			matrix[0][random.nextInt(5)] = 2;
+		}
+	}
+	
+	public void UpdateGame() {
+		for (int i = matrix.length - 1; i > -1; i--) {
+			for(int x = matrix[1].length - 1; x > -1; x--) {
+				//*/
+				//System.out.println();
+				jPanelmatrix[i][x].setPreferredSize(new Dimension(60, 50)); // set the tile size to 50x50 pixels
+				Color color = Color.white;
+				//System.out.println(i);
+				jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+				if(matrix[i][x] == 2) {
+					color = Color.black;
+					if(i == 11 && x == playerLocation) {
+						gameOver = true;
+						gameBoard.setVisible(false);
+						//System.out.println("Game playing: " + !gameOver);
+						gameWindow.add(gameOverPanel);
+					}
+					//System.out.print(" = Black");
+					//This adds gravity to the block
+					
+					if(i <= 11 && !(i == 11 && x == playerLocation)) {
+						//System.out.print("This is where it fell: " + x + ", " + i);
+						coords.add(new Coord(i, x));
+					}
+					if(i == 0 && !(i == 11 && x == playerLocation)) {//This is to get rid of the block at the end
+						//matrix[i][x] = 0;
+						jPanelmatrix[i][x].setBackground(Color.white);
+					}
+				}
+				jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+				jPanelmatrix[i][x].setBackground(color); // alternate tile colors
+				jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+				gameBoard.add(jPanelmatrix[i][x]);
+				//System.out.println();
+			}
+        }
+		jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+		for(int i = 0; i < coords.size(); i++) {
+			int x = coords.get(i).x + 1;
+			int y = coords.get(i).y;
+			Color color = Color.black;
+			//System.out.println(x + "-------------------");
+			
+			if(x == 11) {
+				//System.out.println(playerLocation + ", " + y);
+				
+				if(jPanelmatrix[11][playerLocation].getBackground() != Color.black && y == playerLocation) {
+					
+				}
+				
+				/*
+				if(y == playerLocation && jPanelmatrix[x][y].getBackground() == Color.black) {
+					System.out.println("Killed by: " + x + ", " + y);
+					gameOver = true;
+					gameBoard.setVisible(false);
+					System.out.println("Game playing: " + !gameOver);
+					gameWindow.add(gameOverPanel);
+				}
+				*/
+			}
+			
+			if(x == 12) {
+				jPanelmatrix[x - 1][y].setBackground(Color.white);
+				matrix[x - 1][y] = 0;
+			}else {
+				matrix[x][y] = 2;
+				matrix[x - 1][y] = 0;
+				jPanelmatrix[x][y].setBackground(color);
+			}
+			
+			jPanelmatrix[x - 1][y].setBackground(Color.white);
+		}
+		jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+	}
+	
+	@Override
+	public void keyPressed(KeyEvent e) {
+	    // handle key press event
+	    int keyCode = e.getKeyCode();
+	    //System.out.println("Key pressed: " + KeyEvent.getKeyText(keyCode));
+	    if(keyCode == KeyEvent.VK_A) {
+	        if(playerLocation > 0) {
+	        	jPanelmatrix[11][playerLocation].setBackground(Color.white);
+	        	playerLocation = playerLocation - 1;
+	        	jPanelmatrix[11][playerLocation].setBackground(Color.magenta);
+	        }
+	    }
+	    if(keyCode == KeyEvent.VK_D) {
+	        if(playerLocation < 4) {
+	        	jPanelmatrix[11][playerLocation].setBackground(Color.white);
+	        	playerLocation = playerLocation + 1;
+	        	jPanelmatrix[11][playerLocation].setBackground(Color.magenta);
+	        }
+	    }
+	    //System.out.print(playerLocation);
+	}
+
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // handle key release event
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // handle key typed event
+    }
+	
+    public void RestartGame() {
+    	Random random = new Random();
+		if(firstOpen) {
+			CreateGameBoard();
+		}else {
+			RecreateWindow();
+		}
+		JFrameBuilder();
+		while(!gameOver) {
+			RandomizeDrop();
+			for(int i = 0; i < random.nextInt(3) + 1; i++) {
+				try {
+				    // wait for 1 second (1000 milliseconds)
+				    Thread.sleep((long) gameSpeed);
+				} catch (InterruptedException e) {
+				    e.printStackTrace();
+				}
+				jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+				UpdateGame();
+				jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+			}
+		}
+    }
+    
+	public Falling_Game(){
+		Random random = new Random();
+		if(firstOpen) {
+			CreateGameBoard();
+		}else {
+			RecreateWindow();
+		}
+		JFrameBuilder();
+		while(!gameOver) {
+			RandomizeDrop();
+			for(int i = 0; i < random.nextInt(3) + 1; i++) {
+				try {
+				    // wait for 1 second (1000 milliseconds)
+				    Thread.sleep((long) gameSpeed);
+				} catch (InterruptedException e) {
+				    e.printStackTrace();
+				}
+				jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+				UpdateGame();
+				jPanelmatrix[11][playerLocation].setBackground(Color.MAGENTA);
+				if(gameSpeed > 200) {
+					gameSpeed = gameSpeed - 5;
+					//System.out.println("GS: " + gameSpeed);
+				}
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+        new Falling_Game();
+    }
+}
+
+class Coord {
+    int x;
+    int y;
+
+    public Coord(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
